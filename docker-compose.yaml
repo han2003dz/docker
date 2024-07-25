@@ -1,0 +1,43 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: server
+    ports:
+      - '${PORT}:${PORT}'
+    networks:
+      - my-network
+    depends_on:
+      - postgres
+    environment:
+      - NODE_ENV=production
+      - DB_CONNECTION=pg
+      - DB_HOST=postgres
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
+
+  postgres:
+    image: postgres:14.1-alpine
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
+    expose:
+      - '${DB_PORT}'
+    networks:
+      - my-network
+    volumes:
+      - my-postgres-data:/var/lib/postgresql/data
+
+networks:
+  my-network:
+    driver: bridge
+
+volumes:
+  my-postgres-data:
+    driver: local
